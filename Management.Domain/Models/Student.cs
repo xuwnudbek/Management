@@ -1,8 +1,8 @@
-namespace Management.Domain.Models
+namespace Management.Domain.Models;
+
+public class Student
 {
-    public class Student
-    {
-        public string Id { get; set; }
-        public string FullName { get; set; }
-    }
+    public string Id { get; set; }
+    public string FirstName { get; set; }
+    public string LastName { get; set; }
 }
