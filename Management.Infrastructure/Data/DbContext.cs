@@ -6,10 +6,10 @@ namespace Management.Infrastructure.Data;
 
 public class DbContext
 {
-    public Student[] Students { get; set; }
+    public List<Student> Students { get; set; }
 
     public DbContext()
     {
-        this.Students = new Student[12];
+        this.Students = new List<Student>();
     }
 }

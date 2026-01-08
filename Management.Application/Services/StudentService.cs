@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Management.Domain.Models;
 using Management.Infrastructure.Data;
 
@@ -21,6 +24,11 @@ public class StudentService
             LastName = lastName,
         };
 
-        this.DbContext.Students.Append(student);
+        this.DbContext.Students.Add(student);
+    }
+
+    public List<Student> GetStudents()
+    {
+        return DbContext.Students;
     }
 }

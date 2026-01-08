@@ -2,4 +2,5 @@
   <Project Path="Management.Domain/Management.Domain.csproj" />
   <Project Path="Management.Infrastructure/Management.Infrastructure.csproj" />
   <Project Path="Management.Application/Management.Application.csproj" />
+  <Project Path="Management.Client/Management.Client.csproj" />
 </Solution>
