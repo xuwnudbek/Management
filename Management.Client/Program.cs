@@ -63,6 +63,26 @@ public class Program
         }
     }
 
+    // Menu Add Student
+    public static void MenuAddStudent()
+    {
+        Console.Clear();
+        Console.WriteLine($"========== Add student ==========");
+
+        // New Student Data
+        Console.Write("FirstName: ");
+        string firstName = Console.ReadLine();
+
+        Console.Write("LastName: ");
+        string lastName = Console.ReadLine();
+
+        studentService.Add(firstName, lastName);
+
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine($"Student successfully added!");
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+
     // Menu Update Student
     public static void MenuUpdateStudent()
     {
@@ -134,8 +154,9 @@ public class Program
         Console.WriteLine("  1. Show all students");
         Console.WriteLine("  2. Show student by Id");
         Console.WriteLine("  3. Search student");
-        Console.WriteLine("  4. Update student");
-        Console.WriteLine("  5. Delete student");
+        Console.WriteLine("  4. Add student");
+        Console.WriteLine("  5. Update student");
+        Console.WriteLine("  6. Delete student");
         Console.WriteLine("  0. Exit");
 
         // Read User Option
@@ -155,9 +176,12 @@ public class Program
                 MenuSearchStudent();
                 break;
             case "4":
-                MenuUpdateStudent();
+                MenuAddStudent();
                 break;
             case "5":
+                MenuUpdateStudent();
+                break;
+            case "6":
                 MenuDeleteStudent();
                 break;
             case "0":

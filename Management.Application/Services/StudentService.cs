@@ -19,7 +19,8 @@ public class StudentService
     {
         Student student = new Student(new Random().Next(1, 1000).ToString(), firstName, lastName);
 
-        this.DbContext.Students.Add(student);
+        List<Student> newStudentsList = [.. this.DbContext.Students, student];
+        this.DbContext.Students = newStudentsList;
     }
 
     public List<Student> GetAllStudents()
