@@ -1,81 +1,72 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Management.Application.Interfaces;
 using Management.Domain.Models;
-using Management.Infrastructure.Data;
 
 namespace Management.Application.Services;
 
 public class StudentService
 {
-    public DbContext DbContext { get; set; }
+    private IStudentRepository StudentRepository { get; set; }
+    private IStudentExcelBroker StudentExcelBroker { get; set; }
 
-    public StudentService()
+    public StudentService(
+        IStudentRepository studentRepository,
+        IStudentExcelBroker studentExcelBroker
+    )
     {
-        this.DbContext = new DbContext();
+        this.StudentRepository = studentRepository;
+        this.StudentExcelBroker = studentExcelBroker;
     }
 
     public void Add(string firstName, string lastName)
     {
-        Student student = new Student(new Random().Next(1, 1000).ToString(), firstName, lastName);
+        if (firstName == null || lastName == null)
+            return;
 
-        List<Student> newStudentsList = [.. this.DbContext.Students, student];
-        this.DbContext.Students = newStudentsList;
-    }
-
-    public List<Student> GetAllStudents()
-    {
-        return this.DbContext.Students;
-    }
-
-    public Student GetStudentById(string id)
-    {
-        Student foundStudent = this.DbContext.Students.FirstOrDefault(
-            (student) => student.Id == id
+        var newStudent = new Student(
+            $"ID{new Random().Next(1000, 10000).ToString()}",
+            firstName,
+            lastName
         );
 
-        return foundStudent;
+        StudentRepository.Add(newStudent);
     }
 
-    public List<Student> SearchByText(string text)
+    public Student GetById(string id)
     {
-        List<Student> filteredStudents = this
-            .DbContext.Students.Where(
-                (student) =>
-                    student.FirstName.Contains(text, StringComparison.CurrentCultureIgnoreCase)
-                    || student.LastName.Contains(text, StringComparison.CurrentCultureIgnoreCase)
-            )
-            .ToList();
+        return StudentRepository.GetById(id);
+    }
 
-        return filteredStudents;
+    public List<Student> GetAll()
+    {
+        return StudentRepository.GetAll();
     }
 
     public bool Update(Student student)
     {
-        Student foundStudent = this.DbContext.Students.FirstOrDefault((s) => s.Id == student.Id);
+        bool hasUpdated = StudentRepository.Update(student);
 
-        if (foundStudent is null)
-        {
-            return false;
-        }
-
-        foundStudent.FirstName = student.FirstName;
-        foundStudent.LastName = student.LastName;
-
-        return true;
+        return hasUpdated;
     }
 
-    public bool DeleteStudentById(string id)
+    public bool Delete(string id)
     {
-        Student foundStudent = this.DbContext.Students.FirstOrDefault((s) => s.Id == id);
-
-        if (foundStudent is null)
-        {
-            return false;
-        }
-
-        bool hasRemoved = this.DbContext.Students.Remove(foundStudent);
+        var hasRemoved = StudentRepository.Remove(id);
 
         return hasRemoved;
+    }
+
+    public List<Student> Search(string text)
+    {
+        var searchResults = StudentRepository.Search(text);
+
+        return searchResults;
+    }
+
+    public void ExportToExcel()
+    {
+        var students = StudentRepository.GetAll();
+        StudentExcelBroker.Export(students);
     }
 }

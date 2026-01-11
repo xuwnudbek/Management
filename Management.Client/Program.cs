@@ -1,22 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Management.Application.Services;
 using Management.Domain.Models;
+using Management.Infrastructure.Brokers;
+using Management.Infrastructure.Data;
+using Management.Infrastructure.Repositories;
 
 namespace Management.Client;
 
 public class Program
 {
-    private static readonly StudentService studentService = new();
+    private static StudentService _studentService;
 
-    // Show All Student Method
-    public static void MenuShowAllStudents()
+    // Show All Student
+    private static void MenuShowAllStudents()
     {
         Console.Clear();
         Console.WriteLine("========== Show all students ==========");
 
-        List<Student> students = studentService.GetAllStudents();
+        List<Student> students = _studentService.GetAll();
 
         foreach (var student in students)
         {
@@ -25,7 +27,7 @@ public class Program
     }
 
     // Show student by Id
-    public static void MenuShowStudentById()
+    private static void MenuShowStudentById()
     {
         Console.Clear();
         Console.WriteLine($"========== Show students by Id ==========");
@@ -33,13 +35,15 @@ public class Program
         Console.Write("Student Id: ");
         string studentId = Console.ReadLine();
 
-        Student student = studentService.GetStudentById(studentId);
+        Student student = _studentService.GetById(studentId);
 
         if (student is null)
         {
             Console.ForegroundColor = ConsoleColor.Blue;
             Console.WriteLine("Student not found!");
-            Console.ForegroundColor = ConsoleColor.White;
+
+            SetConsoleDefaultColor();
+
             return;
         }
 
@@ -47,7 +51,7 @@ public class Program
     }
 
     // Menu Search student
-    public static void MenuSearchStudent()
+    private static void MenuSearchStudent()
     {
         Console.Clear();
         Console.WriteLine($"========== Search students by text ==========");
@@ -55,16 +59,16 @@ public class Program
         Console.Write("Search Text: ");
         string searchText = Console.ReadLine();
 
-        List<Student> students = studentService.SearchByText(searchText);
+        var matchedStudents = _studentService.Search(searchText);
 
-        foreach (var student in students)
+        foreach (var student in matchedStudents)
         {
             Console.WriteLine($"{student.Id} - {student.FirstName + " " + student.LastName}");
         }
     }
 
     // Menu Add Student
-    public static void MenuAddStudent()
+    private static void MenuAddStudent()
     {
         Console.Clear();
         Console.WriteLine($"========== Add student ==========");
@@ -76,15 +80,16 @@ public class Program
         Console.Write("LastName: ");
         string lastName = Console.ReadLine();
 
-        studentService.Add(firstName, lastName);
+        _studentService.Add(firstName, lastName);
 
         Console.ForegroundColor = ConsoleColor.Green;
         Console.WriteLine($"Student successfully added!");
-        Console.ForegroundColor = ConsoleColor.White;
+
+        SetConsoleDefaultColor();
     }
 
     // Menu Update Student
-    public static void MenuUpdateStudent()
+    private static void MenuUpdateStudent()
     {
         Console.Clear();
         Console.WriteLine($"========== Search students by text ==========");
@@ -100,101 +105,192 @@ public class Program
 
         Student newStudent = new(studentId, newFirstName, newLastName);
 
-        bool hasUpdated = studentService.Update(newStudent);
+        bool hasUpdated = _studentService.Update(newStudent);
 
         if (hasUpdated)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine($"Student successfully updated!");
-            Console.ForegroundColor = ConsoleColor.White;
         }
         else
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine($"Student update failed.");
-            Console.ForegroundColor = ConsoleColor.White;
         }
+
+        SetConsoleDefaultColor();
     }
 
     // Menu Delete Student
-    public static void MenuDeleteStudent()
+    private static void MenuDeleteStudent()
     {
         Console.Clear();
         Console.WriteLine($"========== Delete student ==========");
 
         Console.Write("Student Id: ");
-        string studentId = Console.ReadLine();
+        var studentId = Console.ReadLine();
 
-        bool deleteSucceeded = studentService.DeleteStudentById(studentId);
+        var deleteSucceeded = _studentService.Delete(studentId);
 
         if (deleteSucceeded)
         {
             Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("Student deleted successfully.");
-            Console.ForegroundColor = ConsoleColor.White;
         }
         else
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Student deleted failed.");
-            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        SetConsoleDefaultColor();
+    }
+
+    // Menu Export/Import students from/to Excel
+    private static void MenuExportImportStudents()
+    {
+        Console.Clear();
+        Console.WriteLine($"========== Export/Import students ==========");
+
+        Console.WriteLine("1. Back to Home");
+        Console.WriteLine("2. Export to Excel");
+        Console.WriteLine("3. Import from Excel");
+
+        Console.Write("\n>> ");
+        var option = Console.ReadLine();
+
+        switch (option)
+        {
+            case "1":
+                MenuMain();
+                break;
+
+            case "2":
+                _studentService.ExportToExcel();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Students exported successfully to Excel.");
+                SetConsoleDefaultColor();
+                break;
+
+            case "3":
+                Console.Write("");
+                _studentService.ImportFromExcel();
+                Console.ForegroundColor = ConsoleColor.Green;
+                Console.WriteLine("Students imported successfully from Excel.");
+                SetConsoleDefaultColor();
+                break;
+
+            default:
+                Console.WriteLine("Please, select an option!");
+                MenuExportImportStudents();
+                break;
+        }
+    }
+
+    private static void SetConsoleDefaultColor()
+    {
+        Console.ForegroundColor = ConsoleColor.White;
+    }
+
+    private static void MenuMain()
+    {
+        var keepRepeating = true;
+
+        while (keepRepeating)
+        {
+            // Configure Console
+            Console.Clear();
+            Console.Title = "Management";
+
+            // Main Menu
+            Console.WriteLine(
+                "====================Welcome To Management App====================\n"
+            );
+
+            Console.WriteLine("Select an option:");
+            Console.WriteLine("  1. Show all students");
+            Console.WriteLine("  2. Show student by Id");
+            Console.WriteLine("  3. Search student");
+            Console.WriteLine("  4. Add student");
+            Console.WriteLine("  5. Update student");
+            Console.WriteLine("  6. Delete student");
+            Console.WriteLine("  7. Export/Import students");
+            Console.WriteLine("  0. Exit");
+
+            // Read User Option
+            Console.Write(">> ");
+            var option = Console.ReadLine();
+
+            // Navigate to selected option
+            switch (option)
+            {
+                case "1":
+                    MenuShowAllStudents();
+                    break;
+                case "2":
+                    MenuShowStudentById();
+                    break;
+                case "3":
+                    MenuSearchStudent();
+                    break;
+                case "4":
+                    MenuAddStudent();
+                    break;
+                case "5":
+                    MenuUpdateStudent();
+                    break;
+                case "6":
+                    MenuDeleteStudent();
+                    break;
+                case "7":
+                    MenuExportImportStudents();
+                    break;
+                case "0":
+                    Environment.Exit(0);
+                    break;
+                default:
+                    Console.WriteLine("Invalid option. Please try again.");
+                    break;
+            }
+
+            Console.WriteLine(
+                "\nPress any key to return to the main menu & Escape to exit from the application..."
+            );
+
+            var consoleKey = Console.ReadKey();
+
+            if (consoleKey.Key == ConsoleKey.Escape)
+                keepRepeating = false;
         }
     }
 
     public static void Main(string[] args)
     {
-        // Configure Console
-        Console.Clear();
-        Console.Title = "Management";
+        /*
+        1. Application
+            Services, Interfaces
+        
+        2. Domain
+            Models
 
-        // Main Menu
-        Console.WriteLine("====================Welcome To Management App====================\n");
+        3. Infrastructure
+            Brokers, Repositories, Storage
+        
+        4. Client
+            Program.cs
+        */
 
-        Console.WriteLine("Select an option:");
-        Console.WriteLine("  1. Show all students");
-        Console.WriteLine("  2. Show student by Id");
-        Console.WriteLine("  3. Search student");
-        Console.WriteLine("  4. Add student");
-        Console.WriteLine("  5. Update student");
-        Console.WriteLine("  6. Delete student");
-        Console.WriteLine("  0. Exit");
+        // Get instance of StudentStorageContext
+        var studentStorageContext = new StudentStorageContext();
 
-        // Read User Option
-        Console.Write(">> ");
-        string option = Console.ReadLine();
+        // Get instance of StudentRepository
+        var studentRepository = new StudentRepository(studentStorageContext);
+        var studentExcelBroker = new StudentExcelBroker();
 
-        // Navigate to selected option
-        switch (option)
-        {
-            case "1":
-                MenuShowAllStudents();
-                break;
-            case "2":
-                MenuShowStudentById();
-                break;
-            case "3":
-                MenuSearchStudent();
-                break;
-            case "4":
-                MenuAddStudent();
-                break;
-            case "5":
-                MenuUpdateStudent();
-                break;
-            case "6":
-                MenuDeleteStudent();
-                break;
-            case "0":
-                Environment.Exit(0);
-                break;
-            default:
-                Console.WriteLine("Invalid option. Please try again.");
-                break;
-        }
+        // Get instance of StudentService
+        _studentService = new StudentService(studentRepository, studentExcelBroker);
 
-        Console.WriteLine("\nPress any key to return to the main menu...");
-        Console.ReadKey();
-
-        Main(args);
+        // Start project's entry point
+        MenuMain();
     }
 }

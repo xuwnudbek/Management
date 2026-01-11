@@ -5,6 +5,10 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Management.Application\Management.Application.csproj" />
     <ProjectReference Include="..\Management.Domain\Management.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="8.4.0" />
   </ItemGroup>
 </Project>

@@ -1,33 +1,70 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Management.Application.Interfaces;
 using Management.Domain.Models;
 
-namespace Management.Application.Repositories;
+namespace Management.Infrastructure.Repositories;
 
 public class StudentRepository : IStudentRepository
 {
+    private readonly IStudentStorageContext _context;
+    private List<Student> Students { get; set; }
+
+    public StudentRepository(IStudentStorageContext context)
+    {
+        this._context = context;
+        this.Students = _context.Load();
+    }
+
     public void Add(Student student)
     {
-        throw new System.NotImplementedException();
+        Students.Add(student);
+        _context.Save(Students);
     }
 
     public Student GetById(string id)
     {
-        throw new System.NotImplementedException();
+        var student = Students.FirstOrDefault(student => student.Id == id);
+        return student;
     }
 
     public List<Student> GetAll()
     {
-        throw new System.NotImplementedException();
+        return Students;
     }
 
-    public Student Update(Student student)
+    public bool Update(Student student)
     {
-        throw new System.NotImplementedException();
+        var targetStudent = Students.FirstOrDefault(s => s.Id == student.Id);
+
+        if (targetStudent == null)
+            return false;
+
+        targetStudent = student;
+        _context.Save(Students);
+
+        return true;
     }
 
-    public void Remove(string id)
+    public bool Remove(string id)
     {
-        throw new System.NotImplementedException();
+        Students.RemoveAll(s => s.Id == id);
+        _context.Save(Students);
+
+        var hasRemoved = Students.All(s => s.Id != id);
+
+        return hasRemoved;
+    }
+
+    public List<Student> Search(string text)
+    {
+        var result = Students
+            .Where(s =>
+                (s.FirstName + " " + s.LastName).Contains(text, StringComparison.OrdinalIgnoreCase)
+            )
+            .ToList();
+
+        return result;
     }
 }
