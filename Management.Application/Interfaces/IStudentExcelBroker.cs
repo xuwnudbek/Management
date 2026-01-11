@@ -7,5 +7,5 @@ namespace Management.Application.Interfaces;
 public interface IStudentExcelBroker
 {
     public void Export(List<Student> students);
-    public void Import(string filePath);
+    public List<Student> Import(string filePath);
 }

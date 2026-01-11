@@ -23,6 +23,21 @@ public class StudentRepository : IStudentRepository
         _context.Save(Students);
     }
 
+    public void AddAll(List<Student> students)
+    {
+        foreach (var student in students)
+        {
+            var existingStudent = Students.FirstOrDefault(s => s.Id == student.Id);
+
+            if (existingStudent != null)
+                continue;
+
+            Students.Add(student);
+        }
+
+        _context.Save(Students);
+    }
+
     public Student GetById(string id)
     {
         var student = Students.FirstOrDefault(student => student.Id == id);

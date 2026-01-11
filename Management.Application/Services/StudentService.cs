@@ -69,4 +69,11 @@ public class StudentService
         var students = StudentRepository.GetAll();
         StudentExcelBroker.Export(students);
     }
+
+    public void ImportFromExcel()
+    {
+        var students = StudentExcelBroker.Import("Student.xlsx");
+
+        StudentRepository.AddAll(students);
+    }
 }

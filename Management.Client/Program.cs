@@ -173,7 +173,6 @@ public class Program
                 break;
 
             case "3":
-                Console.Write("");
                 _studentService.ImportFromExcel();
                 Console.ForegroundColor = ConsoleColor.Green;
                 Console.WriteLine("Students imported successfully from Excel.");
@@ -181,7 +180,6 @@ public class Program
                 break;
 
             default:
-                Console.WriteLine("Please, select an option!");
                 MenuExportImportStudents();
                 break;
         }
