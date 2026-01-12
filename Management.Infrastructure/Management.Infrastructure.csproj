@@ -9,6 +9,6 @@
     <ProjectReference Include="..\Management.Domain\Management.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="EPPlus" Version="8.4.0" />
+    <PackageReference Include="EPPlus" Version="4.5.3.3" />
   </ItemGroup>
 </Project>

@@ -168,14 +168,24 @@ public class Program
             case "2":
                 _studentService.ExportToExcel();
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Students exported successfully to Excel.");
+                Console.WriteLine($"Students exported successfully to Excel.");
                 SetConsoleDefaultColor();
                 break;
 
             case "3":
-                _studentService.ImportFromExcel();
+                Console.Write("File path: ");
+                var filePath = Console.ReadLine();
+
+                var countOfImportedStudents = _studentService.ImportFromExcel(filePath);
+
+                if (countOfImportedStudents is null)
+                    break;
+
                 Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Students imported successfully from Excel.");
+                Console.WriteLine(
+                    $"Students imported successfully from Excel.\nCount of imported students: {countOfImportedStudents}"
+                );
+
                 SetConsoleDefaultColor();
                 break;
 

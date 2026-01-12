@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Management.Application.Interfaces;
 using Management.Domain.Models;
 
@@ -70,10 +71,24 @@ public class StudentService
         StudentExcelBroker.Export(students);
     }
 
-    public void ImportFromExcel()
+    public int? ImportFromExcel(string filePath)
     {
-        var students = StudentExcelBroker.Import("Student.xlsx");
+        try
+        {
+            var students = StudentExcelBroker.Import(filePath);
 
-        StudentRepository.AddAll(students);
+            StudentRepository.AddAll(students);
+            return students.Count;
+        }
+        catch (FileNotFoundException e)
+        {
+            Console.WriteLine("Error: {0}\nFile: {1}", e.Message, e.FileName);
+            throw;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Error: {0}", e.Message);
+            throw;
+        }
     }
 }
